@@ -1,0 +1,42 @@
+version: '3'
+
+services:
+  postgres_db:
+    image: postgres:15.3-alpine
+    restart: always
+    environment:
+      - POSTGRES_USER=user
+      - POSTGRES_PASSWORD=user
+      - POSTGRES_DB=test
+    ports:
+      - '5432:5432'
+
+#  auth:
+#    build:
+#      context: './auth'
+#      dockerfile: Dockerfile
+#    ports:
+#      - "8082:8082"
+#    networks:
+#      - noti_network
+#    depends_on:
+#      - postgres_db
+
+#  reporter:
+#    build:
+#      context: "./reporter"
+#      dockerfile: Dockerfile
+#    ports:
+#      - "8081:8081"
+#    networks:
+#      - noti_network
+#    depends_on:
+#      - postgres_db
+#      - auth
+
+  smtp_test:
+    image: rnwood/smtp4dev
+    restart: always
+    ports:
+      - "3000:80"
+      - "2525:25"
