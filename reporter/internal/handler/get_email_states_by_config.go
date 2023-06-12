@@ -2,36 +2,82 @@ package handler
 
 import (
 	"database/sql"
-	"github.com/gin-gonic/gin"
 	"net/http"
 	"reporter/internal/domain"
-	"strconv"
+
+	"github.com/gin-gonic/gin"
 )
 
 func GetEmailRequestStateByConfig(db *sql.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		configID := c.Param("configID")
-		configIDInt, err := strconv.Atoi(configID)
-		if err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid mail config ID"})
-			return
-		}
+		var err error
+		configIDInt := c.Param("configID")
+		// configIDInt, err := strconv.Atoi(configID)
+		// if err != nil {
+		// 	c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid mail config ID"})
+		// 	return
+		// }
 
-		rows, err := db.Query("SELECT m.id, m.receiver, m.send_date, m.meta_data, m.message_id, m.state, m.inserttime, m.updatetime, m.active, m.mail_request "+
-			"FROM not2_mail_item m JOIN not2_mail_request r ON m.mail_request = r.id WHERE r.mail_config = $1", configIDInt)
+		rows, err := db.Query(`SELECT * FROM not2_mail_item item  
+							   JOIN not2_mail_request n2mr on item.mail_request = n2mr.id  
+							   JOIN not2_request n2r on n2mr.request_id = n2r.id  
+							   WHERE n2mr.mail_config = $1
+							   and n2r.not_user = 0;`, configIDInt)
 		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch email request states by config"})
+			c.JSON(http.StatusInternalServerError, gin.H{
+				"error": "Failed to fetch email request states by config",
+				"err":   err,
+			})
 			return
 		}
 		defer rows.Close()
 
-		emailItems := make([]domain.EmailItem, 0)
+		var emailItems []domain.Notification
 		for rows.Next() {
-			var item domain.EmailItem
-			if err := rows.Scan(&item.ID, &item.Receiver, &item.SendDate, &item.MetaData, &item.MessageID, &item.State, &item.InsertTime, &item.UpdateTime, &item.Active, &item.MailRequest); err != nil {
-				c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch email request states by config"})
+			var item domain.Notification
+
+			err = rows.Scan(
+				&item.ID,
+				&item.Active,
+				&item.InsertTime,
+				&item.UpdateTime,
+				&item.Version,
+				&item.MessageID,
+				&item.MetaData,
+				&item.Receiver,
+				&item.SendDate,
+				&item.State,
+				&item.MailRequest,
+				&item.EmailItem.ID,
+				&item.EmailItem.Active,
+				&item.EmailItem.InsertTime,
+				&item.EmailItem.UpdateTime,
+				&item.EmailItem.Version,
+				&item.EmailItem.Body,
+				&item.EmailItem.ReplyAddress,
+				&item.EmailItem.Subject,
+				&item.EmailItem.Text,
+				&item.EmailItem.MailConfig,
+				&item.EmailItem.RequestID,
+				&item.EmailRequest.ID,
+				&item.EmailRequest.Active,
+				&item.EmailRequest.InsertTime,
+				&item.EmailRequest.UpdateTime,
+				&item.EmailRequest.Version,
+				&item.EmailRequest.JobID,
+				&item.EmailRequest.MessageType,
+				&item.EmailRequest.NotificationID,
+				&item.EmailRequest.NotUser,
+			)
+
+			if err != nil {
+				c.JSON(http.StatusInternalServerError, gin.H{
+					"error": "Failed to parse email request states",
+					"err":   err.Error(),
+				})
 				return
 			}
+
 			emailItems = append(emailItems, item)
 		}
 

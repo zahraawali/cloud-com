@@ -24,19 +24,19 @@ var serveCmd = &cobra.Command{
 			return err
 		}
 
-		authServiceBase, err := cmd.Flags().GetString("auth")
+		authService, err := cmd.Flags().GetString("auth")
 		if err != nil {
 			return err
 		}
 
-		return app.Starter(dsn, addr, authServiceBase)
+		return app.Starter(dsn, addr, authService)
 	},
 }
 
 func init() {
 	rootCmd.AddCommand(serveCmd)
 
-	serveCmd.Flags().String("dsn", "postgres://user:user@postgres_db/test?sslmode=disable", "database connection string")
+	serveCmd.Flags().String("dsn", "postgres://user:user@127.0.0.1/test?sslmode=disable", "database connection string")
 	serveCmd.Flags().String("addr", ":8081", "application host and port")
-	serveCmd.Flags().String("auth", "http://auth:8082", "authorization services address")
+	serveCmd.Flags().String("auth", "http://127.0.0.1:8082", "authorization services address")
 }

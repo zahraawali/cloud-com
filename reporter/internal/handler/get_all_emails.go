@@ -17,13 +17,16 @@ func GetAllEmailRequests(db *sql.DB) gin.HandlerFunc {
 		}
 		defer rows.Close()
 
-		emailRequests := make([]domain.EmailRequest, 0)
+		emailRequests := make([]domain.Email, 0)
+
 		for rows.Next() {
-			var request domain.EmailRequest
+			var request domain.Email
+
 			if err := rows.Scan(&request.ID, &request.Subject, &request.Body, &request.Text, &request.MailConfig, &request.ReplyAddress); err != nil {
 				c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch email requests", "err": err.Error()})
 				return
 			}
+
 			emailRequests = append(emailRequests, request)
 		}
 

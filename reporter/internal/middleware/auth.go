@@ -18,6 +18,7 @@ func Auth(authServiceBase string) gin.HandlerFunc {
 			c.AbortWithStatusJSON(http.StatusUnauthorized, ErrorSchema{
 				Code:    http.StatusUnauthorized,
 				Message: "unauthorized",
+				Error:   err.Error(),
 			})
 			return
 		}
@@ -29,6 +30,7 @@ func Auth(authServiceBase string) gin.HandlerFunc {
 			c.AbortWithStatusJSON(http.StatusUnauthorized, ErrorSchema{
 				Code:    http.StatusUnauthorized,
 				Message: "unauthorized",
+				Error:   err.Error(),
 			})
 			return
 		}
@@ -37,6 +39,7 @@ func Auth(authServiceBase string) gin.HandlerFunc {
 			c.AbortWithStatusJSON(http.StatusUnauthorized, ErrorSchema{
 				Code:    http.StatusUnauthorized,
 				Message: "unauthorized",
+				Error:   err.Error(),
 			})
 			return
 		}
@@ -48,4 +51,5 @@ func Auth(authServiceBase string) gin.HandlerFunc {
 type ErrorSchema struct {
 	Code    int    `json:"code"`
 	Message string `json:"message"`
+	Error   string `json:"error"`
 }

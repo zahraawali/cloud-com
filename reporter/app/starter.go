@@ -3,15 +3,17 @@ package app
 import (
 	"database/sql"
 	"fmt"
-	"github.com/gin-gonic/gin"
-	_ "github.com/lib/pq"
 	"log"
 	"reporter/internal/handler"
 	"reporter/internal/middleware"
+
+	"github.com/gin-gonic/gin"
+	_ "github.com/lib/pq"
 )
 
 func Starter(dsn string, addr string, authServiceBase string) error {
 	fmt.Println("application starter called")
+
 	// Connect to the database
 	var err error
 	db, err := sql.Open("postgres", dsn)
@@ -24,6 +26,7 @@ func Starter(dsn string, addr string, authServiceBase string) error {
 	// Initialize the Gin router
 	router := gin.Default()
 
+	// middleware
 	router.Use(middleware.Auth(authServiceBase))
 
 	// Define the API endpoints
